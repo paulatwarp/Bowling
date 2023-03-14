@@ -11,16 +11,21 @@ public class FrameScore
         subTotal = "";
     }
 
+    public string Mark(int roll)
+    {
+        return roll == 0 ? "-" : roll.ToString();
+    }
+
     public void Spare(int first)
     {
-        marks[0] = first.ToString();
+        marks[0] = Mark(first);
         marks[1] = "/";
     }
 
     public void Score(int first, int second)
     {
-        marks[0] = first.ToString();
-        marks[1] = second.ToString();
+        marks[0] = Mark(first);
+        marks[1] = Mark(second);
     }
 
     public void Strike()
@@ -38,19 +43,19 @@ public class FrameScore
     public void BonusStrike(int bonus)
     {
         marks[1] = "X";
-        marks[2] = bonus.ToString();
+        marks[2] = Mark(bonus);
     }
 
     public void BonusSpare(int first)
     {
-        marks[1] = first.ToString();
+        marks[1] = Mark(first);
         marks[2] = "/";
     }
 
     public void BonusBalls(int first, int second)
     {
-        marks[1] = first.ToString();
-        marks[2] = second.ToString();
+        marks[1] = Mark(first);
+        marks[2] = Mark(second);
     }
 
     public void BonusStrike()
@@ -60,7 +65,7 @@ public class FrameScore
 
     public void BonusBall(int first)
     {
-        marks[2] = first.ToString();
+        marks[2] = Mark(first);
     }
 
     public void Score(int score)

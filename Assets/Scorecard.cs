@@ -79,6 +79,7 @@ public class Scorecard
 
     public void Display(Display display)
     {
+        display.player.text = name;
         for(frame = 0; frame < 10; frame++)
         {
             var displayFrame = display.frames[frame];

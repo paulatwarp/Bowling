@@ -16,54 +16,26 @@ public class Scoring : MonoBehaviour
         Score(rolls, scorecard);
     }
 
-    //code by www.exchangecore.com
-    static int intLength(int integer)
-    {
-        int length = 1;
-        if (integer / 10 > 0)
-            length = 2;
-        if (integer / 100 > 0)
-            length = 3;
-        return length;
-    }
-
-    static String scoreTwo(int totalScore, String score2)
-    {
-        if (intLength(totalScore) == 1)
-            score2 += totalScore + "     ";
-        else if (intLength(totalScore) == 2)
-            score2 += totalScore + "    ";
-        if (intLength(totalScore) == 3)
-            score2 += totalScore + "   ";
-        return score2;
-    }
     void Score(Rolls rolls, Scorecard scorecard)
     {
         int frameScore = 0, prevFrame = 0, prevFrameTwo = 0, bowlOne, bowlTwo = 0, frame = 1, totalScore = 0, extraFrame;
         bool strike = false, strikeTwo = false, spare = false;
-        String score2 = "", frameNum = "", line = "";
+        String frameNum = "", line = "";
 
         for (; frame <= 10; frame++)
         {
-            Debug.LogFormat("Please Enter your Scores for Frame {0}:", frame);
-            do //bowlOne loop
-            {
-                Debug.Log("Bowl 1:");
-                bowlOne = rolls.NextRoll();
-            } while (bowlOne > 10 || bowlOne < 0); //checks for valid bowlOne input
+            bowlOne = rolls.NextRoll();
             if (spare == true)// if previous frame was a spare add in the extra points now
             {
                 prevFrame = 10 + bowlOne;
                 spare = false;
                 totalScore = prevFrame + totalScore;
-                score2 = scoreTwo(totalScore, score2);
                 scorecard.ScoreFrame(totalScore);
             }
             if (strikeTwo == true && bowlOne == 10)
             {
                 prevFrameTwo = 30;
                 totalScore = prevFrameTwo + totalScore;
-                score2 = scoreTwo(totalScore, score2);
                 scorecard.ScoreFrame(totalScore);
             }
             if (strikeTwo == true && bowlOne != 10)
@@ -71,7 +43,6 @@ public class Scoring : MonoBehaviour
                 strikeTwo = false;
                 prevFrameTwo = 10 + 10 + bowlOne;
                 totalScore = prevFrameTwo + totalScore;
-                score2 = scoreTwo(totalScore, score2);
                 scorecard.ScoreFrame(totalScore);
             }
             if (strike == true && bowlOne == 10)
@@ -82,11 +53,7 @@ public class Scoring : MonoBehaviour
 
             if (bowlOne < 10) //check to make sure there wasn't a strike on first bowl
             {
-                do //bowlTwo loop
-                {
-                    Debug.Log("Bowl 2:");
-                    bowlTwo = rolls.NextRoll();
-                } while (bowlTwo > (10 - bowlOne) || bowlTwo < 0);
+                bowlTwo = rolls.NextRoll();
                 if (bowlOne + bowlTwo == 10)
                 {
                     spare = true;
@@ -97,7 +64,6 @@ public class Scoring : MonoBehaviour
                 {
                     prevFrameTwo = 10 + 10 + bowlTwo;
                     totalScore = prevFrameTwo + totalScore;
-                    score2 = scoreTwo(totalScore, score2);
                     scorecard.ScoreFrame(totalScore);
                     strikeTwo = false;
                 }
@@ -107,14 +73,12 @@ public class Scoring : MonoBehaviour
                     strike = false;
                     prevFrame = 10 + bowlOne + bowlTwo;
                     totalScore = totalScore + prevFrame;
-                    score2 = scoreTwo(totalScore, score2);
                     scorecard.ScoreFrame(totalScore);
                 }
                 if (spare != true && strike != true && strikeTwo != true)
                 {
                     frameScore = bowlOne + bowlTwo;
                     totalScore = totalScore + frameScore;
-                    score2 = scoreTwo(totalScore, score2);
                     scorecard.Score(bowlOne, bowlTwo);
                     scorecard.ScoreFrame(totalScore);
                 }
@@ -128,15 +92,11 @@ public class Scoring : MonoBehaviour
             }
             if (frame == 10 && strike == true)
             {
-                do
-                    bowlTwo = rolls.NextRoll();
-                while (bowlTwo < 0 || bowlTwo > 10);
-
+                bowlTwo = rolls.NextRoll();
                 if (strikeTwo == true)
                 {
                     prevFrameTwo = 10 + 10 + bowlTwo;
                     totalScore = prevFrameTwo + totalScore;
-                    score2 = scoreTwo(totalScore, score2);
                     scorecard.ScoreFrame(totalScore);
                     strikeTwo = false;
                 }
@@ -144,14 +104,11 @@ public class Scoring : MonoBehaviour
 
             if (frame == 10 && (spare == true || strike == true))
             {
-                do
-                    extraFrame = rolls.NextRoll();
-                while (extraFrame < 0 || extraFrame > 10);
+                extraFrame = rolls.NextRoll();
                 if (strike == true)
                 {
                     prevFrame = 10 + bowlTwo + extraFrame;
                     totalScore = totalScore + prevFrame;
-                    score2 = scoreTwo(totalScore, score2);
                     scorecard.ScoreFrame(totalScore);
                     if (bowlTwo == 10 && extraFrame == 10)
                     {
@@ -182,7 +139,6 @@ public class Scoring : MonoBehaviour
                         scorecard.BonusBall(extraFrame);
                     }
                     totalScore = totalScore + 10 + extraFrame;
-                    score2 = scoreTwo(totalScore, score2);
                     scorecard.ScoreFrame(totalScore);
                 }
             }
