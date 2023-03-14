@@ -1,4 +1,7 @@
 using System;
+using System.Runtime.InteropServices.WindowsRuntime;
+using UnityEditorInternal;
+using UnityEngine;
 
 public class FrameScore
 {
@@ -9,6 +12,23 @@ public class FrameScore
     {
         marks = new string[3] { string.Empty, string.Empty, string.Empty };
         subTotal = "";
+    }
+
+    public FrameScore(string marks, int score)
+    {
+        this.marks = new string[3] { string.Empty, string.Empty, string.Empty };
+        if (marks[0] == 'X')
+        {
+            this.marks[1] = "X";
+        }
+        else
+        {
+            for (int i = 0; i < marks.Length; ++i)
+            {
+                this.marks[i] = marks[i].ToString();
+            }
+        }
+        subTotal = score.ToString();
     }
 
     public string Mark(int roll)
@@ -73,11 +93,41 @@ public class FrameScore
         subTotal = score.ToString();
     }
 
+    public override string ToString()
+    {
+        return $"FrameScore marks {marks[0]}, {marks[1]}, {marks[2]} subTotal {subTotal}";
+    }
+
     public void Display(DisplayFrame frame)
     {
         frame.mark1.text = marks[0].ToString();
         frame.mark2.text = marks[1].ToString();
         frame.mark3.text = marks[2].ToString();
         frame.subTotal.text = subTotal;
+    }
+
+    public static bool operator ==(FrameScore a, FrameScore b)
+    {
+        bool equal = a.subTotal == b.subTotal && a.marks.Length == b.marks.Length;
+        for (int i = 0; i < a.marks.Length; ++i)
+        {
+            equal = equal && a.marks[i] == b.marks[i];
+        }
+        return equal;
+    }
+
+    public static bool operator !=(FrameScore a, FrameScore b)
+    {
+        return !(a == b);
+    }
+
+    public bool Compare(string marks, int score)
+    {
+        bool equal = score.ToString() == subTotal;
+        for (int i = 0; i < marks.Length; ++i)
+        {
+            equal = equal && this.marks[i] == marks[i].ToString();
+        }
+        return equal;
     }
 }

@@ -21,6 +21,19 @@ public class Scorecard
         mark = 0;
     }
 
+    public Scorecard(string name, string marks, int[] scores)
+    {
+        this.name = name;
+        string[] split = marks.Split(',');
+        int length = scores.Length;
+        Debug.Assert(split.Length == length);
+        frames = new FrameScore[length];
+        for (int i = 0; i < length; ++i)
+        {
+            frames[i] = new FrameScore(split[i], scores[i]);
+        }
+    }
+
     public void Spare(int first)
     {
         frames[mark].Spare(first);
@@ -77,6 +90,37 @@ public class Scorecard
         frame++;
     }
 
+    public override string ToString()
+    {
+        var builder = new StringBuilder();
+        builder.Append("Scorecard {name}");
+        for (int frame = 0; frame < frames.Length; ++frame)
+        {
+            builder.Append($" frame {frame} {frames[frame]}");
+        }
+        return builder.ToString();
+    }
+
+    public override bool Equals(object obj)
+    {
+        return (obj is Scorecard)? this == obj as Scorecard : base.Equals(obj);
+    }
+
+    public static bool operator ==(Scorecard a, Scorecard b)
+    {
+        bool equal = a.name == b.name && a.frames.Length == b.frames.Length;
+        for (int i = 0; i < a.frames.Length; ++i)
+        {
+            equal = equal && a.frames[i] == b.frames[i];
+        }
+        return equal;
+    }
+
+    public static bool operator !=(Scorecard a, Scorecard b)
+    {
+        return !(a == b);
+    }
+
     public void Display(Display display)
     {
         display.player.text = name;
@@ -85,5 +129,16 @@ public class Scorecard
             var displayFrame = display.frames[frame];
             frames[frame].Display(displayFrame);
         }
+    }
+
+    public bool Compare(string marks, int[] scores)
+    {
+        string[] split = marks.Split(',');
+        bool equal = true;
+        for (frame = 0; frame < 10; frame++)
+        {
+            equal = equal && frames[frame].Compare(split[frame], scores[frame]);
+        }
+        return equal;
     }
 }

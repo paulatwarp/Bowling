@@ -9,14 +9,7 @@ public class Scoring : MonoBehaviour
 {
     public Display display;
 
-    private void Start()
-    {
-        var rolls = new Rolls(new int[] { 8, 1, 0, 9, 2, 8, 10, 6, 3, 7, 0, 5, 2, 10, 0, 6, 2, 8, 10 });
-        var scorecard = new Scorecard("Test");
-        Score(rolls, scorecard);
-    }
-
-    void Score(Rolls rolls, Scorecard scorecard)
+    public static void Score(Rolls rolls, Scorecard scorecard)
     {
         int frameScore = 0, prevFrame = 0, prevFrameTwo = 0, bowlOne, bowlTwo = 0, frame = 1, totalScore = 0, extraFrame;
         bool strike = false, strikeTwo = false, spare = false;
@@ -146,6 +139,5 @@ public class Scoring : MonoBehaviour
             frameNum += frame + "    ";
             line += "------";
         }
-        scorecard.Display(display);
     }
 }
