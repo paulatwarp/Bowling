@@ -11,40 +11,8 @@ public class Scoring : MonoBehaviour
 
     private void Start()
     {
-        using (MemoryStream memory = new MemoryStream())
-        {
-            StreamWriter pins = new StreamWriter(memory);
-            pins.WriteLine("8");
-            pins.WriteLine("1");
-            pins.WriteLine("0");
-            pins.WriteLine("9");
-            pins.WriteLine("2");
-            pins.WriteLine("8");
-            pins.WriteLine("10");
-            pins.WriteLine("6");
-            pins.WriteLine("3");
-            pins.WriteLine("7");
-            pins.WriteLine("0");
-            pins.WriteLine("5");
-            pins.WriteLine("2");
-            pins.WriteLine("10");
-            pins.WriteLine("0");
-            pins.WriteLine("6");
-            pins.WriteLine("2");
-            pins.WriteLine("8");
-            pins.WriteLine("10");
-            pins.Flush();
-
-            memory.Position = 0;
-
-            using (StreamReader input = new StreamReader(memory))
-            {
-                Score(input);
-            }
-
-            pins.Close();
-        }
-
+        var rolls = new Rolls(new int[] { 8, 1, 0, 9, 2, 8, 10, 6, 3, 7, 0, 5, 2, 10, 0, 6, 2, 8, 10 });
+        Score(rolls);
     }
 
     //code by www.exchangecore.com
@@ -68,7 +36,7 @@ public class Scoring : MonoBehaviour
             score2 += totalScore + "   ";
         return score2;
     }
-    void Score(StreamReader input)
+    void Score(Rolls input)
     {
         int frameScore = 0, prevFrame = 0, prevFrameTwo = 0, bowlOne, bowlTwo = 0, frame = 1, totalScore = 0, extraFrame;
         bool strike = false, strikeTwo = false, spare = false;
@@ -80,7 +48,7 @@ public class Scoring : MonoBehaviour
             do //bowlOne loop
             {
                 Debug.Log("Bowl 1:");
-                bowlOne = int.Parse(input.ReadLine());
+                bowlOne = input.NextRoll();
             } while (bowlOne > 10 || bowlOne < 0); //checks for valid bowlOne input
             if (spare == true)// if previous frame was a spare add in the extra points now
             {
@@ -114,7 +82,7 @@ public class Scoring : MonoBehaviour
                 do //bowlTwo loop
                 {
                     Debug.Log("Bowl 2:");
-                    bowlTwo = int.Parse(input.ReadLine());
+                    bowlTwo = input.NextRoll();
                 } while (bowlTwo > (10 - bowlOne) || bowlTwo < 0);
                 if (bowlOne + bowlTwo == 10)
                 {
@@ -158,7 +126,7 @@ public class Scoring : MonoBehaviour
             if (frame == 10 && strike == true)
             {
                 do
-                    bowlTwo = int.Parse(input.ReadLine());
+                    bowlTwo = input.NextRoll();
                 while (bowlTwo < 0 || bowlTwo > 10);
 
                 if (strikeTwo == true)
@@ -173,7 +141,7 @@ public class Scoring : MonoBehaviour
             if (frame == 10 && (spare == true || strike == true))
             {
                 do
-                    extraFrame = int.Parse(input.ReadLine());
+                    extraFrame = input.NextRoll();
                 while (extraFrame < 0 || extraFrame > 10);
                 if (strike == true)
                 {
