@@ -5,15 +5,12 @@ using System.IO;
 using TMPro;
 using UnityEngine;
 
-public class Scoring : MonoBehaviour
+public class Scoring
 {
-    public Display display;
-
     public static void Score(Rolls rolls, Scorecard scorecard)
     {
         int frameScore = 0, prevFrame = 0, prevFrameTwo = 0, bowlOne, bowlTwo = 0, frame = 1, totalScore = 0, extraFrame;
         bool strike = false, strikeTwo = false, spare = false;
-        String frameNum = "", line = "";
 
         for (; frame <= 10; frame++)
         {
@@ -50,7 +47,7 @@ public class Scoring : MonoBehaviour
                 if (bowlOne + bowlTwo == 10)
                 {
                     spare = true;
-                    scorecard.Spare(bowlOne);
+                    scorecard.MarkSpare(bowlOne);
                 }
 
                 if (strikeTwo == true && frame == 10)
@@ -72,7 +69,7 @@ public class Scoring : MonoBehaviour
                 {
                     frameScore = bowlOne + bowlTwo;
                     totalScore = totalScore + frameScore;
-                    scorecard.Score(bowlOne, bowlTwo);
+                    scorecard.MarkOpen(bowlOne, bowlTwo);
                     scorecard.ScoreFrame(totalScore);
                 }
             }
@@ -81,7 +78,7 @@ public class Scoring : MonoBehaviour
                 strike = true;
                 prevFrame = 10;
                 if (frame != 10)
-                    scorecard.Strike();
+                    scorecard.MarkStrike();
             }
             if (frame == 10 && strike == true)
             {
@@ -105,39 +102,37 @@ public class Scoring : MonoBehaviour
                     scorecard.ScoreFrame(totalScore);
                     if (bowlTwo == 10 && extraFrame == 10)
                     {
-                        scorecard.BonusStrikes();
+                        scorecard.MarkBonusStrikes();
                     }
                     else if (bowlTwo == 10)
                     {
-                        scorecard.BonusStrike(extraFrame);
+                        scorecard.MarkBonusStrike(extraFrame);
                     }
                     else if (bowlTwo + extraFrame == 10)
                     {
-                        scorecard.BonusSpare(bowlTwo);
+                        scorecard.MarkBonusSpare(bowlTwo);
                     }
                     else
                     {
-                        scorecard.BonusBalls(bowlTwo, extraFrame);
+                        scorecard.MarkBonusBalls(bowlTwo, extraFrame);
                     }
                 }
                 else
                 {
-                    scorecard.Spare(bowlOne);
+                    scorecard.MarkSpare(bowlOne);
                     if (extraFrame == 10)
                     {
-                        scorecard.BonusStrike();
+                        scorecard.MarkBonusStrike();
                     }
                     else
                     {
-                        scorecard.BonusBall(extraFrame);
+                        scorecard.MarkBonusBall(extraFrame);
                     }
                     totalScore = totalScore + 10 + extraFrame;
                     scorecard.ScoreFrame(totalScore);
                 }
             }
             scorecard.MarkNextFrame();
-            frameNum += frame + "    ";
-            line += "------";
         }
     }
 }
