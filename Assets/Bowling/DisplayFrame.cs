@@ -6,7 +6,5 @@ using UnityEngine;
 public class DisplayFrame : MonoBehaviour
 {
     public TMP_Text subTotal;
-    public TMP_Text mark1;
-    public TMP_Text mark2;
-    public TMP_Text mark3;
+    public TMP_Text [] marks;
 }

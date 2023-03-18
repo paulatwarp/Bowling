@@ -1,144 +1,148 @@
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 
 public class Scorecard
 {
     string name;
-    FrameScore[] frames;
-    int mark;
-    int frame;
+    char [] marks;
+    int currentMark;
+    int [] scores;
+    int currentFrame;
 
     public Scorecard(string name)
     {
         this.name = name;
-        frames = new FrameScore[10];
-        for (frame = 0; frame < frames.Length; frame++)
-        {
-            frames[frame] = new FrameScore();
-        }
-        frame = 0;
-        mark = 0;
+        marks = new char[21];
+        scores = new int[10];
+        currentFrame = 0;
+        currentMark = 0;
     }
 
     public Scorecard(string name, string marks, int[] scores)
     {
         this.name = name;
-        string[] split = marks.Split(',');
-        int length = scores.Length;
-        Debug.Assert(split.Length == length);
-        frames = new FrameScore[length];
-        for (int i = 0; i < length; ++i)
+        this.marks = marks.ToCharArray();
+        this.scores = scores;
+        currentMark = 0;
+        currentFrame = 0;
+    }
+
+    char ScoreToMark(int score)
+    {
+        return "-123456789"[score];
+    }
+
+    void SetMarks(char [] marks)
+    {
+        for (int i = 0; i < marks.Length; ++i)
         {
-            frames[i] = new FrameScore(split[i], scores[i]);
+            this.marks[currentMark + i] = marks[i];
         }
     }
 
-    public void Spare(int first)
+    public void MarkSpare(int first)
     {
-        frames[mark].Spare(first);
+        SetMarks(new char[] { ScoreToMark(first), '/', ' ' });
     }
 
-    public void Score(int first, int second)
+    public void MarkOpen(int first, int second)
     {
-        frames[mark].Score(first, second);
+        SetMarks(new char[] { ScoreToMark(first), ScoreToMark(second), ' ' });
     }
 
-    public void Strike()
+    public void MarkStrike()
     {
-        frames[mark].Strike();
+        SetMarks(new char[] { 'X', ' ', ' ' });
     }
 
-    public void BonusStrikes()
+    public void MarkBonusStrikes()
     {
-        frames[mark].BonusStrikes();
+        SetMarks(new char[] { 'X', 'X', 'X' });
     }
 
-    public void BonusStrike(int bonus)
+    public void MarkBonusStrike(int bonus)
     {
-        frames[mark].BonusStrike(bonus);
+        SetMarks(new char[] { 'X', 'X', ScoreToMark(bonus) });
     }
 
-    public void BonusSpare(int first)
+    public void MarkBonusSpare(int first)
     {
-        frames[mark].BonusSpare(first);
+        SetMarks(new char[] { 'X', ScoreToMark(first), '/' });
     }
 
-    public void BonusBalls(int first, int second)
+    public void MarkBonusBalls(int first, int second)
     {
-        frames[mark].BonusBalls(first, second);
+        SetMarks(new char[] { 'X', ScoreToMark(first), ScoreToMark(second) });
     }
 
-    public void BonusStrike()
+    public void MarkBonusStrike()
     {
-        frames[mark].BonusStrike();
+        currentMark += 2;
+        SetMarks(new char[] { 'X' });
     }
 
-    public void BonusBall(int first)
+    public void MarkBonusBall(int first)
     {
-        frames[mark].BonusBall(first);
+        currentMark += 2;
+        SetMarks(new char[] { ScoreToMark(first) });
     }
 
     public void MarkNextFrame()
     {
-        mark++;
+        currentMark += 2;
     }
 
     public void ScoreFrame(int score)
     {
-        frames[frame].Score(score);
-        frame++;
+        scores[currentFrame] = score;
+        currentFrame++;
+    }
+
+    string ListMarks()
+    {
+        return new string (marks);
+    }
+
+    string ListScores()
+    {
+        return string.Join(" ", scores);
     }
 
     public override string ToString()
     {
-        var builder = new StringBuilder();
-        builder.Append("Scorecard {name}");
-        for (int frame = 0; frame < frames.Length; ++frame)
-        {
-            builder.Append($" frame {frame} {frames[frame]}");
-        }
-        return builder.ToString();
+        return $"Scorecard {name} marks {ListMarks()} scores {ListScores()}";
     }
 
     public override bool Equals(object obj)
     {
-        return (obj is Scorecard)? this == obj as Scorecard : base.Equals(obj);
+        return (obj is Scorecard)? Equals(obj as Scorecard) : base.Equals(obj);
     }
 
-    public static bool operator ==(Scorecard a, Scorecard b)
+    public override int GetHashCode()
     {
-        bool equal = a.name == b.name && a.frames.Length == b.frames.Length;
-        for (int i = 0; i < a.frames.Length; ++i)
-        {
-            equal = equal && a.frames[i] == b.frames[i];
-        }
-        return equal;
+        return base.GetHashCode();
     }
 
-    public static bool operator !=(Scorecard a, Scorecard b)
+    public bool Equals(Scorecard other)
     {
-        return !(a == b);
+        return name == other.name && Enumerable.SequenceEqual(marks, other.marks) && Enumerable.SequenceEqual(scores, other.scores);
     }
 
     public void Display(Display display)
     {
         display.player.text = name;
-        for(frame = 0; frame < 10; frame++)
+        int mark = 0;
+        for (int frame = 0; frame < 10; frame++)
         {
             var displayFrame = display.frames[frame];
-            frames[frame].Display(displayFrame);
+            for (int i = 0; i < displayFrame.marks.Length; ++i)
+            {
+                displayFrame.marks[i].text = marks[mark + i].ToString();
+            }
+            mark += 2;
+            displayFrame.subTotal.text = scores[frame].ToString();
         }
-    }
-
-    public bool Compare(string marks, int[] scores)
-    {
-        string[] split = marks.Split(',');
-        bool equal = true;
-        for (frame = 0; frame < 10; frame++)
-        {
-            equal = equal && frames[frame].Compare(split[frame], scores[frame]);
-        }
-        return equal;
     }
 }
