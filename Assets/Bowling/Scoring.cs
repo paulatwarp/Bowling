@@ -1,138 +1,122 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using TMPro;
-using UnityEngine;
 
 public class Scoring
 {
-    public static void Score(Rolls rolls, Scorecard scorecard)
+    static void MarkRolls(int [] rolls, Scorecard scorecard)
     {
-        int frameScore = 0, prevFrame = 0, prevFrameTwo = 0, bowlOne, bowlTwo = 0, frame = 1, totalScore = 0, extraFrame;
-        bool strike = false, strikeTwo = false, spare = false;
-
-        for (; frame <= 10; frame++)
+        if (rolls[0] == 10)
         {
-            bowlOne = rolls.NextRoll();
-            if (spare == true)// if previous frame was a spare add in the extra points now
+            scorecard.MarkStrike();
+            if (rolls[1] == 10)
             {
-                prevFrame = 10 + bowlOne;
-                spare = false;
-                totalScore = prevFrame + totalScore;
-                scorecard.ScoreFrame(totalScore);
-            }
-            if (strikeTwo == true && bowlOne == 10)
-            {
-                prevFrameTwo = 30;
-                totalScore = prevFrameTwo + totalScore;
-                scorecard.ScoreFrame(totalScore);
-            }
-            if (strikeTwo == true && bowlOne != 10)
-            {
-                strikeTwo = false;
-                prevFrameTwo = 10 + 10 + bowlOne;
-                totalScore = prevFrameTwo + totalScore;
-                scorecard.ScoreFrame(totalScore);
-            }
-            if (strike == true && bowlOne == 10)
-            {
-                strikeTwo = true;
-                prevFrameTwo = 20;
-            }
-
-            if (bowlOne < 10) //check to make sure there wasn't a strike on first bowl
-            {
-                bowlTwo = rolls.NextRoll();
-                if (bowlOne + bowlTwo == 10)
-                {
-                    spare = true;
-                    scorecard.MarkSpare(bowlOne);
-                }
-
-                if (strikeTwo == true && frame == 10)
-                {
-                    prevFrameTwo = 10 + 10 + bowlTwo;
-                    totalScore = prevFrameTwo + totalScore;
-                    scorecard.ScoreFrame(totalScore);
-                    strikeTwo = false;
-                }
-
-                if (strike == true && bowlOne != 10)
-                {
-                    strike = false;
-                    prevFrame = 10 + bowlOne + bowlTwo;
-                    totalScore = totalScore + prevFrame;
-                    scorecard.ScoreFrame(totalScore);
-                }
-                if (spare != true && strike != true && strikeTwo != true)
-                {
-                    frameScore = bowlOne + bowlTwo;
-                    totalScore = totalScore + frameScore;
-                    scorecard.MarkOpen(bowlOne, bowlTwo);
-                    scorecard.ScoreFrame(totalScore);
-                }
+                scorecard.MarkStrike();
             }
             else
             {
-                strike = true;
-                prevFrame = 10;
-                if (frame != 10)
-                    scorecard.MarkStrike();
+                scorecard.MarkBonusBall(rolls[1]);
             }
-            if (frame == 10 && strike == true)
+        }
+        else if (rolls[0] + rolls[1] == 10)
+        {
+            scorecard.MarkSpare(rolls[0]);
+        }
+        else
+        {
+            scorecard.MarkOpen(rolls[0], rolls[1]);
+        }
+    }
+
+    public static void Score(Rolls rolls, Scorecard scorecard)
+    {
+        int previousStrikesToCount = 0;
+        int previousSparesToCount = 0;
+
+        for (int frame = 1; frame <= 10; frame++)
+        {
+            bool lastFrame = frame == 10;
+            int bowl1 = rolls.NextRoll();
+            int bowl2 = 0;
+            int bowl3 = 0;
+            bool isStrike = bowl1 == 10;
+            if (lastFrame || !isStrike)
             {
-                bowlTwo = rolls.NextRoll();
-                if (strikeTwo == true)
+                bowl2 = rolls.NextRoll();
+            }
+            bool isSpare = !isStrike && bowl1 + bowl2 == 10;
+            if (lastFrame && (isStrike || isSpare))
+            {
+                bowl3 = rolls.NextRoll();
+            }
+
+            if (previousSparesToCount > 0) // if previous frame was a spare add in the extra points now
+            {
+                ScoreSpare(bowl1, scorecard);
+            }
+
+            if (previousStrikesToCount > 1)
+            {
+                ScoreStrike(new int [] { 10, bowl1 }, scorecard);
+            }
+
+            if (!isStrike && previousStrikesToCount > 0)
+            {
+                ScoreStrike(new int[] { bowl1, bowl2 }, scorecard);
+            }
+
+            if (isStrike)
+            {
+                scorecard.MarkStrike();
+            }
+            else if (isSpare)
+            {
+                scorecard.MarkSpare(bowl1);
+            }
+            else
+            {
+                scorecard.MarkOpen(bowl1, bowl2);
+            }
+
+            if (lastFrame)
+            {
+                if (isStrike)
                 {
-                    prevFrameTwo = 10 + 10 + bowlTwo;
-                    totalScore = prevFrameTwo + totalScore;
-                    scorecard.ScoreFrame(totalScore);
-                    strikeTwo = false;
+                    MarkRolls(new int[] { bowl2, bowl3 }, scorecard);
+                }
+                else if (isSpare)
+                {
+                    if (bowl3 == 10)
+                    {
+                        scorecard.MarkStrike();
+                    }
+                    else
+                    {
+                        scorecard.MarkBonusBall(bowl3);
+                    }
                 }
             }
 
-            if (frame == 10 && (spare == true || strike == true))
+            if (lastFrame && isStrike && previousStrikesToCount > 0)
             {
-                extraFrame = rolls.NextRoll();
-                if (strike == true)
-                {
-                    prevFrame = 10 + bowlTwo + extraFrame;
-                    totalScore = totalScore + prevFrame;
-                    scorecard.ScoreFrame(totalScore);
-                    if (bowlTwo == 10 && extraFrame == 10)
-                    {
-                        scorecard.MarkBonusStrikes();
-                    }
-                    else if (bowlTwo == 10)
-                    {
-                        scorecard.MarkBonusStrike(extraFrame);
-                    }
-                    else if (bowlTwo + extraFrame == 10)
-                    {
-                        scorecard.MarkBonusSpare(bowlTwo);
-                    }
-                    else
-                    {
-                        scorecard.MarkBonusBalls(bowlTwo, extraFrame);
-                    }
-                }
-                else
-                {
-                    scorecard.MarkSpare(bowlOne);
-                    if (extraFrame == 10)
-                    {
-                        scorecard.MarkBonusStrike();
-                    }
-                    else
-                    {
-                        scorecard.MarkBonusBall(extraFrame);
-                    }
-                    totalScore = totalScore + 10 + extraFrame;
-                    scorecard.ScoreFrame(totalScore);
-                }
+                ScoreStrike(new int[] { bowl1, bowl2 }, scorecard);
             }
-            scorecard.MarkNextFrame();
+
+            if (lastFrame || (!isStrike && !isSpare))
+            {
+                scorecard.ScoreFrame(bowl1 + bowl2 + bowl3);
+            }
+
+            previousStrikesToCount = isStrike? previousStrikesToCount + 1 : 0;
+            previousSparesToCount = isSpare? 1 : 0;
         }
+    }
+
+    static void ScoreSpare(int bowl1, Scorecard scorecard)
+    {
+        scorecard.ScoreFrame(10 + bowl1);
+    }
+
+    static void ScoreStrike(int [] bowl, Scorecard scorecard)
+    {
+        scorecard.ScoreFrame(10 + bowl[0] + bowl[1]);
     }
 }
